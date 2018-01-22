@@ -13,4 +13,10 @@ public interface WorkerService {
      * @throws Exception
      */
     void watcherMasterService()throws Exception;
+
+    /**
+     * 删除worker service
+     * @throws Exception
+     */
+    void deleteWorkerService()throws Exception;
 }

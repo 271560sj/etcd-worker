@@ -22,6 +22,10 @@ public class WorkerController {
     public void workerService()throws Exception{
         //注册worker service
         workerService.setKeyValues();
+
+        //删除worker service
+        workerService.deleteWorkerService();
+
         //监控Master service
         workerService.watcherMasterService();
     }

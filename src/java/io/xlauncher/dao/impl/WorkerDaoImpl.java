@@ -62,4 +62,20 @@ public class WorkerDaoImpl implements WorkerDao {
             return entity;
         }
     }
+
+    public KeyEntity deleteWorkerSerive(String url) throws Exception {
+        KeyEntity entity = new KeyEntity();
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            HttpEntity httpEntity = new HttpEntity(null,headers);
+            ResponseEntity<KeyEntity> responseEntity = restTemplate.exchange(url,HttpMethod.DELETE,httpEntity,KeyEntity.class);
+            if (responseEntity.getStatusCodeValue() == 200){
+                entity = responseEntity.getBody();
+            }
+        }catch (Exception e){
+            log.error("WorkerDaoImpl,deleteWorkerSerive,delete worker service error",e);
+        }finally {
+            return entity;
+        }
+    }
 }

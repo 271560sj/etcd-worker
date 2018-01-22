@@ -52,6 +52,21 @@ public class WorkerServiceImpl implements WorkerService {
         thread.start();
     }
 
+    //删除worker service
+    public void deleteWorkerService() throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":" + properties.getProperty("worker.registry.etcd.port"))
+                .append("/v2/keys/").append(properties.getProperty("worker.registry.key"))
+                .append(Boolean.parseBoolean(properties.getProperty("worker.registry.recursive")) == true
+                        && Boolean.parseBoolean(properties.getProperty("worker.registry.dir")) == false
+                        ? "?recursive=" + Boolean.parseBoolean(properties.getProperty("worker.registry.recursive"))
+                        : "?dir=" + Boolean.parseBoolean(properties.getProperty("worker.registry.dir")));
+        String url = stringBuffer.toString();
+        DeleteworkerServiceThread deleteworkerServiceThread = new DeleteworkerServiceThread(url);
+        Thread thread = new Thread(deleteworkerServiceThread);
+        thread.start();
+    }
+
     //获取URL
     private String getUrls(){
         StringBuffer url = new StringBuffer();
@@ -110,7 +125,7 @@ public class WorkerServiceImpl implements WorkerService {
                     KeyEntity entity = workerDao.setKeyValues(url,parames);
                     //将注册后的返回信息打印到日志输出
                     log.info("Registry: " + JSONObject.toJSONString(entity));
-                    Thread.sleep(10);
+                    Thread.sleep(1000 * 60);
                     i ++;
                     if (i > 20){
                         break;
@@ -152,10 +167,40 @@ public class WorkerServiceImpl implements WorkerService {
                         //打印到日志
                         log.info("Watcher: " + JSONObject.toJSONString(registryEntity));
                     }
-                    Thread.sleep(10);
+                    Thread.sleep(1000 * 60);
                 }catch (Exception e){
                     log.error("WorkerServiceImpl,WatcherMasterService error",e);
                 }
+            }
+        }
+    }
+
+    class DeleteworkerServiceThread implements Runnable{
+
+        //打印日志
+        Log log =LogFactory.getLog(DeleteworkerServiceThread.class);
+
+        //请求的URL
+        private String url;
+
+        public DeleteworkerServiceThread(String url){
+            this.url = url;
+        }
+
+        //执行删除操作线程
+        public void run() {
+            try {
+                while (true){
+                    KeyEntity entity = workerDao.deleteWorkerSerive(url);
+                    if (entity.getNode() != null){
+                        String service = entity.getNode().getValue();
+                        RegistryEntity registryEntity = JSONObject.parseObject(service,RegistryEntity.class);
+                        log.info("Delete: "+ JSONObject.toJSONString(registryEntity));
+                    }
+                    Thread.sleep(1000 * 60);
+                }
+            }catch (Exception e){
+                log.error("WorkerServiceImpl,DeleteworkerServiceThread,delete worker service error",e);
             }
         }
     }

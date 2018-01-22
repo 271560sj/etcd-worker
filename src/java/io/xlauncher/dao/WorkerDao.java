@@ -21,4 +21,12 @@ public interface WorkerDao {
      * @throws Exception
      */
     KeyEntity watcherMasterService(String url, Object[] parames)throws Exception;
+
+    /**
+     * 删除worker service的服务信息
+     * @param url
+     * @return
+     * @throws Exception
+     */
+    KeyEntity deleteWorkerSerive(String url)throws Exception;
 }
