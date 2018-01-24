@@ -118,7 +118,8 @@ public class WorkerServiceImpl implements WorkerService {
 
         //线程运行方式
         public void run() {
-            int i = 0;
+            //计数
+            int count = 0;
             while (true){
                 try {
                     //进行 worker service的信息注册
@@ -126,8 +127,8 @@ public class WorkerServiceImpl implements WorkerService {
                     //将注册后的返回信息打印到日志输出
                     log.info("Registry: " + JSONObject.toJSONString(entity));
                     Thread.sleep(1000 * 60);
-                    i ++;
-                    if (i > 20){
+                    count ++;
+                    if (count > 20){
                         break;
                     }
                 }catch (Exception e){
@@ -190,6 +191,8 @@ public class WorkerServiceImpl implements WorkerService {
         //执行删除操作线程
         public void run() {
             try {
+                //计数
+                int count = 0;
                 while (true){
                     KeyEntity entity = workerDao.deleteWorkerSerive(url);
                     if (entity.getNode() != null){
@@ -197,6 +200,11 @@ public class WorkerServiceImpl implements WorkerService {
                         RegistryEntity registryEntity = JSONObject.parseObject(service,RegistryEntity.class);
                         log.info("Delete: "+ JSONObject.toJSONString(registryEntity));
                     }
+                    count ++;
+                    if (count > 20){
+                        break;
+                    }
+
                     Thread.sleep(1000 * 60);
                 }
             }catch (Exception e){
