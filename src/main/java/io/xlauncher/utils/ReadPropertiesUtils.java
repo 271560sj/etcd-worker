@@ -11,6 +11,8 @@ import java.util.Properties;
 @Component
 public class ReadPropertiesUtils {
 
+    //配置文件路径
+    private final static String PROPERTIESPATH = "/static/config/worker-service.properties";
     //打印日志
     private static Log log = LogFactory.getLog(ReadPropertiesUtils.class);
 
@@ -24,7 +26,7 @@ public class ReadPropertiesUtils {
         properties = new Properties();
         InputStream in = null;
         try {
-            in = ReadPropertiesUtils.class.getResourceAsStream("./worker-service.properties");
+            in = ReadPropertiesUtils.class.getResourceAsStream(PROPERTIESPATH);
             properties.load(in);
         }catch (Exception e){
             log.error("ReadPropertiesUtils,loadProperties,read properties file error");
