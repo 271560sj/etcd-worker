@@ -1,5 +1,6 @@
 package io.xlauncher.controller;
 
+import io.xlauncher.entity.KeyEntity;
 import io.xlauncher.service.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,42 @@ public class WorkerController {
 
         //监控Master service
         workerService.watcherMasterService();
+    }
+
+    /**
+     * 通过前端的ajax请求注册服务信息
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping(value = "/registryService")
+    public KeyEntity registryMasterService()throws Exception{
+        KeyEntity entity = workerService.registryWorkerServices();
+        return entity;
+    }
+
+    /**
+     * 通过前端的ajax请求删除worker service
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping(value = "/deleteService")
+    public KeyEntity deleteMasterService()throws Exception{
+        KeyEntity entity = workerService.deleteWorkerServices();
+        return entity;
+    }
+
+    /**
+     * 监控master service的服务信息，通过前端ajax进行请求
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping(value = "/watcherService")
+    public KeyEntity watcherMasterService()throws Exception{
+        KeyEntity entity = workerService.watcherMasterServices();
+        return entity;
     }
 
     /**

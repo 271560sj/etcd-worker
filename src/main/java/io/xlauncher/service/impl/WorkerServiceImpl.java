@@ -11,6 +11,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class WorkerServiceImpl implements WorkerService {
 
@@ -22,13 +26,14 @@ public class WorkerServiceImpl implements WorkerService {
     ReadPropertiesUtils properties;
     //设置worker service的信息
     public void setKeyValues() throws Exception {
-        //构造请求的URL
+        /*//构造请求的URL
         String url = getUrls();
         //构造请求的参数
-        Object[] parames = getParameValues();
+        Object[] parames = getParameValues();*/
+        Map<String, Object> map = getRegistryUrlsAndParames();
 
         //运行线程
-        SetKeyValuesThread setKeyValuesThread = new SetKeyValuesThread(url,parames);
+        SetKeyValuesThread setKeyValuesThread = new SetKeyValuesThread((String)map.get("url"),(Object[])map.get("parames"));
         Thread thread = new Thread(setKeyValuesThread);
         thread.start();
 
@@ -36,7 +41,7 @@ public class WorkerServiceImpl implements WorkerService {
 
     //监控Master service的信息变化
     public void watcherMasterService() throws Exception {
-        //构造请求的URL
+        /*//构造请求的URL
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":" + properties.getProperty("worker.registry.etcd.port"))
                 .append("/v2/keys/").append(properties.getProperty("worker.listen.wait.key")).append("?wait=true").
@@ -45,29 +50,114 @@ public class WorkerServiceImpl implements WorkerService {
 
         //构造请求参数
         Object[] parames = getParameValues();
-
+*/
         //运行线程
-        WatcherMasterServiceThread watcherMasterServiceThread = new WatcherMasterServiceThread(url,parames);
+        WatcherMasterServiceThread watcherMasterServiceThread = new WatcherMasterServiceThread(getWatcherUrls());
         Thread thread = new Thread(watcherMasterServiceThread);
         thread.start();
     }
 
     //删除worker service
     public void deleteWorkerService() throws Exception {
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":" + properties.getProperty("worker.registry.etcd.port"))
-                .append("/v2/keys/").append(properties.getProperty("worker.registry.key"))
-                .append(Boolean.parseBoolean(properties.getProperty("worker.registry.recursive")) == true
-                        && Boolean.parseBoolean(properties.getProperty("worker.registry.dir")) == false
-                        ? "?recursive=" + Boolean.parseBoolean(properties.getProperty("worker.registry.recursive"))
-                        : "?dir=" + Boolean.parseBoolean(properties.getProperty("worker.registry.dir")));
-        String url = stringBuffer.toString();
-        DeleteworkerServiceThread deleteworkerServiceThread = new DeleteworkerServiceThread(url);
+//        StringBuffer stringBuffer = new StringBuffer();
+//        stringBuffer.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":" + properties.getProperty("worker.registry.etcd.port"))
+//                .append("/v2/keys/").append(properties.getProperty("worker.registry.key"))
+//                .append(Boolean.parseBoolean(properties.getProperty("worker.registry.recursive")) == true
+//                        && Boolean.parseBoolean(properties.getProperty("worker.registry.dir")) == false
+//                        ? "?recursive=" + Boolean.parseBoolean(properties.getProperty("worker.registry.recursive"))
+//                        : "?dir=" + Boolean.parseBoolean(properties.getProperty("worker.registry.dir")));
+//        String url = stringBuffer.toString();
+        DeleteworkerServiceThread deleteworkerServiceThread = new DeleteworkerServiceThread(getDeleteUrls());
         Thread thread = new Thread(deleteworkerServiceThread);
         thread.start();
     }
 
-    //获取URL
+    //ajax请求注册服务
+    public KeyEntity registryWorkerServices() throws Exception {
+        Map<String, Object> map = getRegistryUrlsAndParames();
+        KeyEntity entity = workerDao.setKeyValues((String)map.get("url"),(Object[])map.get("parames"));
+        return entity;
+    }
+
+    //ajax请求删除服务
+    public KeyEntity deleteWorkerServices() throws Exception {
+        KeyEntity entity = workerDao.deleteWorkerSerive(getDeleteUrls());
+        return entity;
+    }
+
+    //ajax请求监控服务
+    public KeyEntity watcherMasterServices() throws Exception {
+        KeyEntity entity = workerDao.watcherMasterService(getWatcherUrls());
+        return entity;
+    }
+
+    //构造Watcher的URL
+    private String getWatcherUrls(){
+        //构造请求的URL
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":"
+                + properties.getProperty("worker.registry.etcd.port"))
+                .append("/v2/keys/").append(properties.getProperty("worker.listen.wait.key"))
+                .append("?wait=true")
+                .append(Integer.parseInt(properties.getProperty("worker.listen.wait.index")) == 0
+                        ? "" : "&waitIndex=" + Integer.parseInt(properties.getProperty("worker.listen.wait.index")))
+                .append(Boolean.parseBoolean(properties.getProperty("worker.listen.wait.recursive")) ? "&recursive=true" : "");
+        return stringBuffer.toString();
+    }
+
+    //获取删除的URL
+    private String getDeleteUrls(){
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":"
+                + properties.getProperty("worker.registry.etcd.port"))
+                .append("/v2/keys/").append(properties.getProperty("worker.registry.key"))
+                .append(Boolean.parseBoolean(properties.getProperty("worker.registry.recursive")) ? "?recursive=true"
+                        : (Boolean.parseBoolean(properties.getProperty("worker.registry.dir")) ? "?dir=true" : ""));
+        return stringBuffer.toString();
+    }
+
+    //构造URL与请求参数
+    private Map<String, Object> getRegistryUrlsAndParames(){
+        //map用于存储URL与请求参数
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        //存储请求参数
+        ArrayList<Object> list = new ArrayList<Object>();
+
+        StringBuffer url = new StringBuffer();
+
+        url.append("http://").append(properties.getProperty("worker.registry.etcd.ip") + ":"
+                + properties.getProperty("worker.registry.etcd.port"))
+                .append("/v2/keys/").append(properties.getProperty("worker.registry.key")).append("?value={value}");
+
+        //构造注册信息
+        RegistryEntity entity = new RegistryEntity();
+        entity.setServiceIP(properties.getProperty("worker.registry.service.ip"));
+        entity.setServicePort(properties.getProperty("worker.registry.service.port"));
+        entity.setServiceName(properties.getProperty("worker.registry.service.name"));
+
+        //添加到list集合
+        list.add(JSONObject.toJSONString(entity));
+
+        if (Integer.parseInt(properties.getProperty("worker.registry.ttl")) > 0){
+            url.append("&ttl={ttl}");//ttl设置Key的生存时间
+            list.add(Integer.parseInt(properties.getProperty("worker.registry.ttl")));
+        }
+        if (Boolean.parseBoolean(properties.getProperty("worker.registry.dir")) == true){
+            url.append("&dir={dir}");//设置Key是否为目录
+            list.add(Boolean.parseBoolean(properties.getProperty("worker.registry.dir")));
+        }
+        if (Boolean.parseBoolean(properties.getProperty("worker.registry.recursive"))){
+            url.append("&recursive={recursive}");//设置是否进行级联操作
+            list.add(Boolean.parseBoolean(properties.getProperty("worker.registry.recursive")));
+        }
+
+        map.put("url",url.toString());
+        map.put("parames",list.toArray());
+        return map;
+    }
+
+    /*//获取URL
     private String getUrls(){
         StringBuffer url = new StringBuffer();
 
@@ -98,7 +188,7 @@ public class WorkerServiceImpl implements WorkerService {
         parames[2] = Boolean.parseBoolean(properties.getProperty("worker.registry.dir"));
         parames[3] = Boolean.parseBoolean(properties.getProperty("worker.registry.recursive"));
         return parames;
-    }
+    }*/
 
     class SetKeyValuesThread implements Runnable{
 
@@ -146,13 +236,9 @@ public class WorkerServiceImpl implements WorkerService {
         //请求的URL
         private String url;
 
-        //传递的参数
-        private Object[] parames;
-
         //构造方法,将请求URL与参数赋值
-        public WatcherMasterServiceThread(String url, Object[] parames){
+        public WatcherMasterServiceThread(String url){
             this.url = url;
-            this.parames = parames;
         }
 
         //线程实现run
@@ -160,7 +246,7 @@ public class WorkerServiceImpl implements WorkerService {
             while (true){
                 try {
                     //进行监控的方法
-                    KeyEntity entity = workerDao.watcherMasterService(url,parames);
+                    KeyEntity entity = workerDao.watcherMasterService(url);
                     if (entity.getNode() != null){
                         //获取监控到的Master service的信息
                         String register = entity.getNode().getValue();

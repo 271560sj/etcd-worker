@@ -3,6 +3,6 @@ require.config({
     paths: {
         "jquery": "lib/jquery/jquery-3.3.1",
         "vue": "lib/vue/vue",
-        "master": "master/master",
+        "worker": "worker/worker",
     }
 });

@@ -42,7 +42,7 @@ public class WorkerDaoImpl implements WorkerDao {
     }
 
     //监控Master service 的信息
-    public KeyEntity watcherMasterService(String url, Object[] parames) throws Exception {
+    public KeyEntity watcherMasterService(String url) throws Exception {
         KeyEntity entity = new KeyEntity();
 
         //请求etcd响应
@@ -51,7 +51,7 @@ public class WorkerDaoImpl implements WorkerDao {
             HttpHeaders headers = new HttpHeaders();
             HttpEntity httpEntity = new HttpEntity(null,headers);
             //请求etcd
-            ResponseEntity<KeyEntity> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, KeyEntity.class, parames);
+            ResponseEntity<KeyEntity> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, KeyEntity.class);
             //判断返回结果
             if (responseEntity.getStatusCodeValue() == 200){
                 entity = responseEntity.getBody();

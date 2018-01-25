@@ -16,11 +16,10 @@ public interface WorkerDao {
     /**
      * 监控Master service的服务信息
      * @param url
-     * @param parames
      * @return
      * @throws Exception
      */
-    KeyEntity watcherMasterService(String url, Object[] parames)throws Exception;
+    KeyEntity watcherMasterService(String url)throws Exception;
 
     /**
      * 删除worker service的服务信息
