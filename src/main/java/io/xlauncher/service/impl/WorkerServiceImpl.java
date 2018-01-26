@@ -19,11 +19,11 @@ import java.util.Map;
 public class WorkerServiceImpl implements WorkerService {
 
     @Autowired
-    WorkerDao workerDao;
+    private WorkerDao workerDao;
 
     //获取配置文件信息
     @Autowired
-    ReadPropertiesUtils properties;
+    private ReadPropertiesUtils properties;
     //设置worker service的信息
     public void setKeyValues() throws Exception {
         /*//构造请求的URL

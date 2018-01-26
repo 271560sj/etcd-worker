@@ -38,19 +38,20 @@ define([
                     type: "POST",
                     dataType: "json",
                     success: function(data){
-                        if(data != undefined){
-                            var nodes = _self.objData.nodeInfo;
-                            nodes.action = data.action;
-                            if (data.node != undefined){
-                                nodes.node.key = data.node.key;
-                                if (data.node.value != undefined){
-                                    nodes.node.value = data.node.value;
-                                }
-                                nodes.node.ttl = data.node.ttl;
-                                nodes.node.dir = data.node.dir;
-                            }
-                            _self.objData.nodes.push(nodes);
-                        }
+                        // if(data != undefined){
+                        //     var nodes = _self.objData.nodeInfo;
+                        //     nodes.action = data.action;
+                        //     if (data.node != undefined){
+                        //         nodes.node.key = data.node.key;
+                        //         if (data.node.value != undefined){
+                        //             nodes.node.value = data.node.value;
+                        //         }
+                        //         nodes.node.ttl = data.node.ttl;
+                        //         nodes.node.dir = data.node.dir;
+                        //     }
+                        //     _self.objData.nodes.push(nodes);
+                        // }
+                        _self.dealData(data,"Worker");
                     },
                     error: function(data){
                     }
@@ -64,19 +65,20 @@ define([
                      type: "POST",
                      dataType: "json",
                      success: function (data) {
-                         if(data != undefined){
-                             var nodes = _self.objData.nodeInfo;
-                             nodes.action = data.action;
-                             if (data.node != undefined){
-                                 nodes.node.key = data.node.key;
-                                 if (data.node.value != undefined){
-                                     nodes.node.value = data.node.value;
-                                 }
-                                 nodes.node.ttl = data.node.ttl;
-                                 nodes.node.dir = data.node.dir;
-                             }
-                             _self.objData.nodes.push(nodes);
-                         }
+                         // if(data != undefined){
+                         //     var nodes = _self.objData.nodeInfo;
+                         //     nodes.action = data.action;
+                         //     if (data.node != undefined){
+                         //         nodes.node.key = data.node.key;
+                         //         if (data.node.value != undefined){
+                         //             nodes.node.value = data.node.value;
+                         //         }
+                         //         nodes.node.ttl = data.node.ttl;
+                         //         nodes.node.dir = data.node.dir;
+                         //     }
+                         //     _self.objData.nodes.push(nodes);
+                         // }
+                         _self.dealData(data,"Worker");
                      },
                      error: function (data) {
 
@@ -90,24 +92,41 @@ define([
                      type: "POST",
                      dataType: "json",
                      success: function (data) {
-                         if(data != undefined){
-                             var nodes = _self.objData.nodeInfo;
-                             nodes.action = data.action;
-                             if (data.node != undefined){
-                                 nodes.node.key = data.node.key;
-                                 if (data.node.value != undefined){
-                                     nodes.node.value = data.node.value;
-                                 }
-                                 nodes.node.ttl = data.node.ttl;
-                                 nodes.node.dir = data.node.dir;
-                             }
-                             _self.objData.nodes.push(nodes);
-                         }
+                         // if(data != undefined){
+                         //     var nodes = _self.objData.nodeInfo;
+                         //     nodes.action = data.action;
+                         //     if (data.node != undefined){
+                         //         nodes.node.key = data.node.key;
+                         //         if (data.node.value != undefined){
+                         //             nodes.node.value = data.node.value;
+                         //         }
+                         //         nodes.node.ttl = data.node.ttl;
+                         //         nodes.node.dir = data.node.dir;
+                         //     }
+                         //     _self.objData.nodes.push(nodes);
+                         // }
+                         _self.dealData(data,"Master");
                      },
                      error: function (data) {
 
                      }
                  })
+             },
+             dealData:function (data,doing) {
+                 var _self = this;
+                 if(data != undefined){
+                     var nodes = _self.objData.nodeInfo;
+                     if (data.errorCode == 0){
+                         nodes.action = doing + " " + data.action;
+                         if (data.node != undefined){
+                             nodes.node.key = data.node.key;
+                             nodes.node.value = data.node.value;
+                             nodes.node.ttl = data.node.ttl;
+                             nodes.node.dir = data.node.dir;
+                         }
+                         _self.objData.nodes.push(nodes);
+                     }
+                 }
              }
          }
 

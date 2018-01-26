@@ -13,7 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class WorkerController {
 
     @Autowired
-    WorkerService workerService;
+    private WorkerService workerService;
 
     /**
      * 启动worker service
